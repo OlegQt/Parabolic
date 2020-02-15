@@ -239,7 +239,3 @@ void CDraw::setFtype(unsigned int type)
     this->currentFunctionType+=11;
     if(this->currentFunctionType>22)this->currentFunctionType=11;
 }
-
-
-
-
