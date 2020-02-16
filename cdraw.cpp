@@ -167,6 +167,9 @@ void CDraw::paintBuffer()
     QPen * pen =new QPen();
     qreal xPos,yPos;
     QPainterPath * path=new QPainterPath();
+    QRectF viewport;
+    viewport = QRect(0,0,this->width(),this->height());
+
     this->bufferImg.fill();
     this->bufferImg=this->bufferImg.scaled(this->width(),this->height(),Qt::IgnoreAspectRatio,Qt::FastTransformation);
     QPainter *paint = new QPainter();
@@ -191,9 +194,10 @@ void CDraw::paintBuffer()
             yPos+=this->delta->y(); // Отрабатываем смещение виртуального экрана по OY
 
             if(currentX==0) path->moveTo(0,yPos); // Если график пустой, переносим первую точку
-            if(yPos<0) path->moveTo(0,yPos); // adding
-            else path->lineTo(currentX,yPos); // Строим линию до каждой точки
-
+            else
+            {
+                    if(viewport.contains(xPos,yPos)) path->lineTo(currentX,yPos); // Строим линию до каждой точки
+            }
             currentX++; // increment
         }
         vectorPos++; // Переход к следующему графику
@@ -211,14 +215,22 @@ void CDraw::paintTemporalChart(CChart *temporalChart)
 {
     int currentX=0;
     qreal xPos,yPos;
+    QRectF viewport;
+    viewport = QRect(0,0,this->width(),this->height());
+
     this->temporalLine->clear();
+
     while(currentX<this->width())
     {
         xPos=-this->delta->x()+currentX;
         yPos = this->getRealY(temporalChart->getY(xPos)); // Отрабатываем инверсию по оси Ординат
         yPos+=this->delta->y(); // Отрабатываем смещение виртуального экрана по OY
+        //Проверка на вхождение точек в область viewport
+
+
         if(currentX==0) this->temporalLine->moveTo(0,yPos); // Если график пустой, переносим первую точку
-        this->temporalLine->lineTo(currentX,yPos);
+        //  Строим линию только если точка лежит в области viewport
+        if(viewport.contains(xPos,yPos)) this->temporalLine->lineTo(currentX,yPos);
         currentX++;
     }
     this->update();
